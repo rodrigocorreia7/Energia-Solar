@@ -21,9 +21,13 @@ export const Header: React.FC<HeaderProps> = ({ currentPath = '/', onNavigate })
     }
 
     const handleScroll = () => {
-      // Hero container tem 580vh. Ao passar da área do hero (~4.9 viewport heights), transiciona para o header branco
-      const heroThreshold = window.innerHeight * 4.9;
-      setIsScrolledPastHero(window.scrollY > heroThreshold);
+      const heroEl = document.getElementById('hero');
+      if (heroEl) {
+        const rect = heroEl.getBoundingClientRect();
+        setIsScrolledPastHero(rect.bottom <= 80);
+      } else {
+        setIsScrolledPastHero(window.scrollY > 300);
+      }
     };
 
     handleScroll();

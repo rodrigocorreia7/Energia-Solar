@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, Sun, Moon, Zap, ChevronDown, Award } from 'lucide-react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 export interface HeroScrolltellingProps {
@@ -13,75 +13,55 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentStage, setCurrentStage] = useState<number>(0);
+  const currentStageRef = useRef<number>(0);
   const durationRef = useRef<number>(7.66);
-  const pendingTimeRef = useRef<number | null>(null);
-  const lastSeekTimeRef = useRef<number>(0);
-  const rafIdRef = useRef<number | null>(null);
+  const isSeekingRef = useRef<boolean>(false);
+  const targetTimeRef = useRef<number>(0);
+  const seekRafRef = useRef<number | null>(null);
+  const seekTimeoutRef = useRef<number | null>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
+  // Agendador de busca no vídeo desacoplado e não-bloqueante
+  const scheduleSeek = useCallback(() => {
+    if (seekRafRef.current !== null) return;
 
-  const performSeek = (time: number) => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const duration = durationRef.current || 7.66;
-    const target = Math.max(0, Math.min(duration, time));
-    pendingTimeRef.current = target;
-
-    if (rafIdRef.current !== null) return;
-
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = null;
+    seekRafRef.current = requestAnimationFrame(() => {
+      seekRafRef.current = null;
       const v = videoRef.current;
-      if (!v) return;
-      const next = pendingTimeRef.current;
-      if (next === null) return;
+      if (!v || v.readyState < 1) return;
 
-      const now = performance.now();
-      // Não bloqueia se o navegador demorar mais de 80ms no seek
-      if (v.readyState >= 1 && (!v.seeking || now - lastSeekTimeRef.current > 80)) {
-        if (Math.abs(v.currentTime - next) >= 0.02) {
-          try {
-            lastSeekTimeRef.current = now;
-            v.currentTime = next;
-          } catch {
-            // ignore
+      // Se o player já está no meio de um seek físico, não interrompe para não congelar o decodificador
+      if (isSeekingRef.current || v.seeking) return;
+
+      const duration = durationRef.current || 7.66;
+      const target = Math.max(0, Math.min(duration, targetTimeRef.current));
+      const diff = Math.abs(v.currentTime - target);
+
+      // Limiar suave: só busca se a diferença for maior que 0.04s (~1 frame)
+      if (diff >= 0.04) {
+        try {
+          isSeekingRef.current = true;
+
+          // Timeout de segurança para destravar caso o navegador demore ou engula o evento seeked
+          if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+          seekTimeoutRef.current = window.setTimeout(() => {
+            isSeekingRef.current = false;
+            const curV = videoRef.current;
+            if (curV && Math.abs(curV.currentTime - targetTimeRef.current) >= 0.05) {
+              scheduleSeek();
+            }
+          }, 120);
+
+          if ('fastSeek' in v && typeof (v as any).fastSeek === 'function') {
+            (v as any).fastSeek(target);
+          } else {
+            v.currentTime = target;
           }
+        } catch {
+          isSeekingRef.current = false;
         }
       }
     });
-  };
-
-  const updateProgress = (progress: number) => {
-    const p = Math.max(0, Math.min(1, progress));
-
-    // 6 Estágios:
-    let stage = 0;
-    if (p < 0.14) {
-      stage = 0;
-    } else if (p < 0.28) {
-      stage = 1;
-    } else if (p < 0.44) {
-      stage = 2;
-    } else if (p < 0.58) {
-      stage = 3;
-    } else if (p < 0.72) {
-      stage = 4;
-    } else {
-      stage = 5;
-    }
-    setCurrentStage(stage);
-
-    // O vídeo avança de 0s a 7.66s entre 0% e 75% do scroll.
-    // Dos 75% aos 100%, fica estático na noite total com lua cheia.
-    const duration = durationRef.current || 7.66;
-    const videoProgress = Math.min(1, p / 0.75);
-    const targetTime = videoProgress * duration;
-    performSeek(targetTime);
-  };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -91,19 +71,20 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       if (video.duration && !isNaN(video.duration) && video.duration > 0) {
         durationRef.current = video.duration;
       }
-      updateProgress(scrollYProgress.get());
     };
 
     const onSeeked = () => {
+      isSeekingRef.current = false;
+      if (seekTimeoutRef.current) {
+        clearTimeout(seekTimeoutRef.current);
+        seekTimeoutRef.current = null;
+      }
       const v = videoRef.current;
       if (!v) return;
-      if (pendingTimeRef.current !== null && Math.abs(v.currentTime - pendingTimeRef.current) > 0.03) {
-        try {
-          lastSeekTimeRef.current = performance.now();
-          v.currentTime = pendingTimeRef.current;
-        } catch {
-          // ignore
-        }
+
+      // Se durante o seek anterior o usuário rolou para outro ponto, agenda o próximo frame suavemente
+      if (Math.abs(v.currentTime - targetTimeRef.current) >= 0.05) {
+        scheduleSeek();
       }
     };
 
@@ -115,39 +96,82 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       durationRef.current = video.duration;
     }
 
-    // Inicializa o primeiro frame
-    video.currentTime = 0.01;
+    try {
+      video.currentTime = 0.01;
+    } catch {
+      // ignore
+    }
 
-    // 1. Escuta Framer Motion useScroll
-    const unsubscribe = scrollYProgress.on('change', (progress) => {
-      updateProgress(progress);
-    });
+    // Monitoramento de scroll leve e ultra-otimizado (Zero Forced Reflows no scroll)
+    let isTicking = false;
+    let cachedTop = 0;
+    let cachedScrollDistance = 1;
 
-    // 2. Escuta scroll nativo da janela como fallback imediato
-    const handleNativeScroll = () => {
+    const measureContainer = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const totalScroll = rect.height - window.innerHeight;
-      if (totalScroll <= 0) return;
-      const currentScroll = -rect.top;
-      const progress = Math.max(0, Math.min(1, currentScroll / totalScroll));
-      updateProgress(progress);
+      cachedTop = window.scrollY + rect.top;
+      cachedScrollDistance = Math.max(1, rect.height - window.innerHeight);
     };
 
-    window.addEventListener('scroll', handleNativeScroll, { passive: true });
-    handleNativeScroll();
+    measureContainer();
+
+    const handleScroll = () => {
+      if (isTicking) return;
+      isTicking = true;
+
+      requestAnimationFrame(() => {
+        isTicking = false;
+        const currentScroll = window.scrollY - cachedTop;
+        const progress = Math.max(0, Math.min(1, currentScroll / cachedScrollDistance));
+
+        // 6 Estágios bem distribuídos
+        let stage = 0;
+        if (progress < 0.16) {
+          stage = 0;
+        } else if (progress < 0.32) {
+          stage = 1;
+        } else if (progress < 0.48) {
+          stage = 2;
+        } else if (progress < 0.64) {
+          stage = 3;
+        } else if (progress < 0.80) {
+          stage = 4;
+        } else {
+          stage = 5;
+        }
+
+        if (stage !== currentStageRef.current) {
+          currentStageRef.current = stage;
+          setCurrentStage(stage);
+        }
+
+        // Scrub do vídeo: percorre de 0s até 7.66s nos primeiros 80% do percurso
+        const duration = durationRef.current || 7.66;
+        const videoProgress = Math.min(1, progress / 0.80);
+        targetTimeRef.current = videoProgress * duration;
+        scheduleSeek();
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', measureContainer, { passive: true });
+    handleScroll();
 
     return () => {
-      unsubscribe();
-      window.removeEventListener('scroll', handleNativeScroll);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', measureContainer);
       video.removeEventListener('loadedmetadata', onMeta);
       video.removeEventListener('canplay', onMeta);
       video.removeEventListener('seeked', onSeeked);
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
+      if (seekRafRef.current !== null) {
+        cancelAnimationFrame(seekRafRef.current);
+      }
+      if (seekTimeoutRef.current) {
+        clearTimeout(seekTimeoutRef.current);
       }
     };
-  }, [scrollYProgress]);
+  }, [scheduleSeek]);
 
   const handleSimularClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     e.preventDefault();
@@ -240,7 +264,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[580vh] bg-[#0A0D14]"
+      className="relative w-full h-[380vh] bg-[#0A0D14]"
       id="hero"
     >
       {/* Container Sticky (Prende na tela durante o scroll) */}
@@ -266,13 +290,13 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados conforme exemplo-hero1 e exemplo-hero2) */}
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 md:pt-32 text-center flex flex-col items-center">
           
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false}>
             <motion.div
               key={activeStageData.id}
-              initial={{ opacity: 0, y: 22, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -18, filter: 'blur(4px)' }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
               className="flex flex-col items-center max-w-4xl"
             >
               {/* Badge de Contexto */}
