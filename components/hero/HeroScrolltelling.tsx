@@ -125,20 +125,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         const currentScroll = window.scrollY - cachedTop;
         const progress = Math.max(0, Math.min(1, currentScroll / cachedScrollDistance));
 
-        // 6 Estágios bem distribuídos
+        // 3 Estágios bem distribuídos
         let stage = 0;
-        if (progress < 0.16) {
+        if (progress < 0.35) {
           stage = 0;
-        } else if (progress < 0.32) {
+        } else if (progress < 0.70) {
           stage = 1;
-        } else if (progress < 0.48) {
-          stage = 2;
-        } else if (progress < 0.64) {
-          stage = 3;
-        } else if (progress < 0.80) {
-          stage = 4;
         } else {
-          stage = 5;
+          stage = 2;
         }
 
         if (stage !== currentStageRef.current) {
@@ -146,9 +140,9 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
           setCurrentStage(stage);
         }
 
-        // Scrub do vídeo: percorre de 0s até 7.66s nos primeiros 80% do percurso
+        // Scrub do vídeo: percorre de 0s até 7.66s nos primeiros 85% do percurso
         const duration = durationRef.current || 7.66;
-        const videoProgress = Math.min(1, progress / 0.80);
+        const videoProgress = Math.min(1, progress / 0.85);
         targetTimeRef.current = videoProgress * duration;
         scheduleSeek();
       });
@@ -194,77 +188,47 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
   };
 
-  // 6 Etapas com a Copy Oficial e Ganchos Horários de Guanambi
+  // 3 Etapas Oficiais Solicitadas
   const stages = [
     {
-      id: 'manha',
-      badge: '6H DA MANHÃ EM GUANAMBI',
-      badgeClass: 'bg-[#F59E0B]/20 border-[#F59E0B]/50 text-[#F59E0B] shadow-amber-500/20',
-      dotClass: 'bg-[#F59E0B]',
-      headline: 'O sol nasce forte.',
-      subcopy: 'Todos os dias. Sem falhar. Grátis.',
-      shortLabel: '01. 6H MANHÃ',
-      targetProgress: 0.05,
-    },
-    {
       id: 'dia',
-      badge: '☀️ 12H • O SOL TRABALHA POR VOCÊ',
-      badgeClass: 'bg-white/15 border-white/25 text-white shadow-black/30',
+      badge: '☀️ O SOL TRABALHA PARA VOCÊ',
+      badgeClass: 'bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-amber-500/20',
       dotClass: 'bg-amber-400',
-      headline: 'De dia, ele trabalha por você.',
-      subcopy: 'Cada raio vira crédito na sua conta Coelba.',
-      shortLabel: '02. DIA',
-      targetProgress: 0.20,
+      headline: 'DE DIA O SOL TRABALHA PARA VOCÊ.',
+      subcopy: 'Todos os dias. Sem falhar. Grátis.',
+      shortLabel: '01. DE DIA',
+      targetProgress: 0.1,
     },
     {
       id: 'usina',
-      badge: '⚡ 17H • PÔR-DO-SOL E GERAÇÃO',
+      badge: '⚡ SEU TELHADO VIRA USINA',
       badgeClass: 'bg-orange-500/20 border-orange-400/40 text-orange-200 shadow-orange-500/20',
       dotClass: 'bg-orange-400',
-      headline: 'Seu telhado virou usina.',
-      subcopy: 'Enquanto você trabalha, sua casa gera.',
-      shortLabel: '03. USINA',
-      targetProgress: 0.36,
-    },
-    {
-      id: 'economia',
-      badge: '💡 19H • LUZES ACENDENDO',
-      badgeClass: 'bg-indigo-500/20 border-indigo-400/40 text-indigo-200 shadow-indigo-500/20',
-      dotClass: 'bg-indigo-400',
-      headline: 'O sol se vai. Sua economia fica.',
-      subcopy: 'Créditos acumulados para usar quando quiser.',
-      shortLabel: '04. ECONOMIA',
-      targetProgress: 0.50,
+      headline: 'SEU TELHADO VIRA USINA',
+      subcopy: 'Cada raio vira crédito em sua conta Coelba.',
+      shortLabel: '02. SEU TELHADO',
+      targetProgress: 0.5,
     },
     {
       id: 'noite',
-      badge: '🌙 21H • CONFORTO TOTAL DA FAMÍLIA',
+      badge: '🌙 DE NOITE VOCÊ USUFRUI',
       badgeClass: 'bg-sky-500/20 border-sky-400/40 text-sky-200 shadow-sky-500/20',
       dotClass: 'bg-sky-400',
-      headline: 'De noite, você usufrui.',
-      subcopy: 'Ar ligado. Casa acesa. Família tranquila.',
-      shortLabel: '05. NOITE',
-      targetProgress: 0.65,
-    },
-    {
-      id: 'travada',
-      badge: '🔒 TARIFA MÍNIMA • ENGENHARIA PERUTCHE',
-      badgeClass: 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300 shadow-emerald-500/20',
-      dotClass: 'bg-emerald-400',
-      headline: 'Conta travada em R$ 78,40',
-      subcopy: 'O resto é lucro. Por 25 anos.',
-      shortLabel: '06. R$ 78,40',
+      headline: 'DE NOITE VOCÊ USUFRUI',
+      subcopy: 'Ar Ligado, Casa acesa. Família Tranquila.',
+      shortLabel: '03. DE NOITE',
       showCta: true,
       targetProgress: 0.85,
     },
   ];
 
-  const activeStageData = stages[currentStage];
+  const activeStageData = stages[currentStage] || stages[0];
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[380vh] bg-[#0A0D14]"
+      className="relative w-full h-[240vh] bg-[#0A0D14]"
       id="hero"
     >
       {/* Container Sticky (Prende na tela durante o scroll) */}
@@ -287,7 +251,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
           <div className="absolute inset-0 bg-radial-[circle_at_center,_transparent_30%,_rgba(0,0,0,0.5)_100%] pointer-events-none" />
         </div>
 
-        {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados conforme exemplo-hero1 e exemplo-hero2) */}
+        {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados) */}
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 md:pt-32 text-center flex flex-col items-center">
           
           <AnimatePresence initial={false}>
@@ -307,16 +271,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
 
               {/* Headline Principal */}
               <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.08] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                {activeStageData.id === 'travada' ? (
-                  <>
-                    Conta travada em{' '}
-                    <span className="text-emerald-400 drop-shadow-[0_0_25px_rgba(52,211,153,0.8)]">
-                      R$ 78,40
-                    </span>
-                  </>
-                ) : (
-                  activeStageData.headline
-                )}
+                {activeStageData.headline}
               </h1>
 
               {/* Sub-copy de Apoio */}
@@ -324,7 +279,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
                 {activeStageData.subcopy}
               </p>
 
-              {/* CTA Vermelho Pulsante (Aparece no estágio final 88% - 100%) */}
+              {/* CTA Vermelho Pulsante (Aparece no estágio final da noite) */}
               {activeStageData.showCta && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9, y: 15 }}
@@ -359,10 +314,10 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
 
         </div>
 
-        {/* Camada 3: Rodapé Sticky (Barra de progresso dos 6 estágios e indicador de rolagem) */}
+        {/* Camada 3: Rodapé Sticky (Barra de progresso dos 3 estágios e indicador de rolagem) */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 flex flex-col items-center gap-4">
           
-          {/* Indicadores dos 6 Estágios */}
+          {/* Indicadores dos 3 Estágios */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 bg-black/60 backdrop-blur-md px-3 sm:px-4 py-2 rounded-full border border-white/15 overflow-x-auto max-w-full">
             {stages.map((stg, index) => {
               const isActive = currentStage === index;
@@ -370,7 +325,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
                 <button
                   type="button"
                   key={stg.id}
-                  onClick={() => handleStageClick(stg.targetProgress ?? (index * 0.16))}
+                  onClick={() => handleStageClick(stg.targetProgress ?? (index * 0.4))}
                   className={`flex items-center gap-1 sm:gap-1.5 transition-all duration-300 shrink-0 cursor-pointer hover:opacity-100 ${
                     isActive ? 'text-white' : 'text-white/40'
                   }`}
@@ -380,7 +335,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
                       isActive ? 'bg-[#E51E25] scale-125 shadow-[0_0_8px_#E51E25]' : 'bg-white/30'
                     }`}
                   />
-                  <span className="hidden md:inline text-[10px] lg:text-[11px] font-bold tracking-wider">
+                  <span className="text-[11px] sm:text-xs font-bold tracking-wider">
                     {stg.shortLabel}
                   </span>
                   {index < stages.length - 1 && (
@@ -392,14 +347,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
           </div>
 
           {/* Indicador de Rolagem */}
-          {currentStage < 5 ? (
+          {currentStage < 2 ? (
             <div className="flex items-center gap-1.5 text-xs text-slate-300/80 font-medium tracking-wide animate-bounce">
               <span>Role para continuar a história</span>
               <ChevronDown className="w-4 h-4 text-slate-300" />
             </div>
           ) : (
             <div className="text-xs text-amber-300 font-semibold tracking-wider uppercase">
-              ↓ Role abaixo para ver as soluções completas e calcular sua conta
+              ↓ Role abaixo para calcular sua conta e ver os kits
             </div>
           )}
 
