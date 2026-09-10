@@ -1,0 +1,6 @@
+{
+  "name": "Perutche Solar - Energia Solar em Guanambi, BA",
+  "description": "Zere sua conta de luz com energia solar. 72+ cerâmicas atendidas desde 2018. Financiamento em 84x. Rua Nilza Cardoso 510, Guanambi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
