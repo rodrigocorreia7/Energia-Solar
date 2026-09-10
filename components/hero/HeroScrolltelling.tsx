@@ -192,9 +192,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
   const stages = [
     {
       id: 'dia',
-      badge: '☀️ O SOL TRABALHA PARA VOCÊ',
-      badgeClass: 'bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-amber-500/20',
-      dotClass: 'bg-amber-400',
       headline: 'DE DIA O SOL TRABALHA PARA VOCÊ.',
       subcopy: 'Todos os dias. Sem falhar. Grátis.',
       shortLabel: '01. DE DIA',
@@ -202,9 +199,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     },
     {
       id: 'usina',
-      badge: '⚡ SEU TELHADO VIRA USINA',
-      badgeClass: 'bg-orange-500/20 border-orange-400/40 text-orange-200 shadow-orange-500/20',
-      dotClass: 'bg-orange-400',
       headline: 'SEU TELHADO VIRA USINA',
       subcopy: 'Cada raio vira crédito em sua conta Coelba.',
       shortLabel: '02. SEU TELHADO',
@@ -212,9 +206,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     },
     {
       id: 'noite',
-      badge: '🌙 DE NOITE VOCÊ USUFRUI',
-      badgeClass: 'bg-sky-500/20 border-sky-400/40 text-sky-200 shadow-sky-500/20',
-      dotClass: 'bg-sky-400',
       headline: 'DE NOITE VOCÊ USUFRUI',
       subcopy: 'Ar Ligado, Casa acesa. Família Tranquila.',
       shortLabel: '03. DE NOITE',
@@ -245,10 +236,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
             className="w-full h-full object-cover"
             aria-hidden="true"
           />
-
-          {/* Gradients para contraste perfeito da tipografia (Topo e Base) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/20 to-black/80 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-[circle_at_center,_transparent_30%,_rgba(0,0,0,0.5)_100%] pointer-events-none" />
         </div>
 
         {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados) */}
@@ -263,12 +250,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
               transition={{ duration: 0.28, ease: 'easeOut' }}
               className="flex flex-col items-center max-w-4xl"
             >
-              {/* Badge de Contexto */}
-              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md border text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-4 sm:mb-5 shadow-lg ${activeStageData.badgeClass}`}>
-                <span className={`w-2 h-2 rounded-full animate-pulse ${activeStageData.dotClass}`} />
-                <span>{activeStageData.badge}</span>
-              </div>
-
               {/* Headline Principal */}
               <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.08] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
                 {activeStageData.headline}

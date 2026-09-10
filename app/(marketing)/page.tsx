@@ -61,7 +61,7 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
       {/* 5. Calculadora - Seção destacada */}
       <section
         id="calculadora"
-        className="py-20 md:py-24 bg-[#F9FAFB] border-t border-gray-200 relative overflow-hidden"
+        className="py-20 md:py-24 bg-[#F9FAFB] border-t border-gray-200 relative overflow-hidden font-jakarta"
       >
         {/* Efeito sutil de iluminação de fundo */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#E51E25]/5 rounded-full blur-[140px] pointer-events-none" />

@@ -297,7 +297,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   )}`;
 
   return (
-    <div className="w-full max-w-5xl mx-auto bg-white border border-gray-200 rounded-3xl shadow-xl p-5 sm:p-8 lg:p-10 relative overflow-hidden">
+    <div className="w-full max-w-5xl mx-auto bg-white border border-gray-200 rounded-3xl shadow-xl p-5 sm:p-8 lg:p-10 relative overflow-hidden font-jakarta">
       {/* Barra de progresso estilo Typeform no topo */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-100">
         <motion.div

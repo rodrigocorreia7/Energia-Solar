@@ -161,7 +161,7 @@ export default function SimularPage({ onNavigate }: SimularPageProps) {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-white text-gray-900 selection:bg-[#E51E25] selection:text-white">
+    <div className="min-h-dvh flex flex-col bg-white text-gray-900 selection:bg-[#E51E25] selection:text-white font-jakarta">
       
       {/* 1. Header Simples */}
       <header className="w-full border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-40">
