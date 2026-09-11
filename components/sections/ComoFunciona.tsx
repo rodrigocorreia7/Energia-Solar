@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Sun, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { LaserFlow } from '../ui/LaserFlow';
+import { CircularText } from '../ui/CircularText';
 
 export interface ComoFuncionaProps {
   onNavigate?: (path: string) => void;
@@ -70,6 +71,16 @@ export const ComoFunciona: React.FC<ComoFuncionaProps> = ({ onNavigate }) => {
 
       <div className="w-full max-w-[96vw] xl:max-w-7xl 2xl:max-w-[1540px] mx-auto px-2 sm:px-4 md:px-6 lg:px-8 relative z-10">
         
+        {/* Efeito Circular PERUTCHE-SOLAR- no espaço entre as seções */}
+        <div className="flex justify-center items-center pt-2 pb-6 relative z-30">
+          <CircularText
+            text="PERUTCHE-SOLAR-"
+            onHover="slowDown"
+            spinDuration={11}
+            className="text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]"
+          />
+        </div>
+
         {/* 1. Feixe Solar Volumétrico WebGL (LaserFlow) vindo do topo e incidindo na borda superior do quadrado */}
         <div className="relative w-full max-w-5xl mx-auto h-[260px] sm:h-[320px] md:h-[380px] pointer-events-none -mb-4 sm:-mb-5 z-20 overflow-visible">
           <LaserFlow
