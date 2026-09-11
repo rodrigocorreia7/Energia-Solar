@@ -47,6 +47,7 @@ export default function SimularPage({ onNavigate }: SimularPageProps) {
     piscina: false,
     chuveiro: 1,
     geladeiraExtra: false,
+    outros: false,
   });
 
   // Estado condicional para exibição dos resultados após cálculo

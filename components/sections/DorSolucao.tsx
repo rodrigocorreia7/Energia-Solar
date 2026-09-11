@@ -28,7 +28,7 @@ const cardVariants = {
     y: 0,
     transition: {
       duration: 0.55,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98] as const,
     },
   },
 };
@@ -42,7 +42,7 @@ const inversionVariants = {
     transition: {
       duration: 0.6,
       delay: 0.25,
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   },
 };

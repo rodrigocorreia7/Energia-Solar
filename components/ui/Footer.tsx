@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Sun, MapPin, Phone, Mail, Clock, ShieldCheck, Heart } from 'lucide-react';
 import { GUANAMBI_SOLAR_CONFIG } from '../../lib/solar/tariffs';

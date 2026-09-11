@@ -1,13 +1,20 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { WhatsAppFloat } from '../components/ui/WhatsAppFloat';
+import { ChatbotChrisFloat } from '../components/ui/ChatbotChrisFloat';
 import { localBusinessStructuredData } from '../lib/seo/structuredData';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
   display: 'swap',
 });
 
@@ -32,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={inter.variable}>
+    <html lang="pt-BR" className={`${inter.variable} ${jakarta.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -51,7 +58,8 @@ export default function RootLayout({
         </a>
 
         {children}
-        {/* WhatsApp flutuante fixo em todas as páginas */}
+        {/* Chatbot Chris (IA) e WhatsApp flutuantes em todas as páginas */}
+        <ChatbotChrisFloat />
         <WhatsAppFloat />
       </body>
     </html>

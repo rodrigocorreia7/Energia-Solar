@@ -15,7 +15,7 @@ export interface ProjetosPageProps {
 export default function ProjetosPage({ onNavigate }: ProjetosPageProps) {
   const [filter, setFilter] = useState<'Todos' | 'Residencial' | 'Comercial' | 'Industrial' | 'Rural'>('Todos');
 
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+  const handleNav = (e: React.MouseEvent<HTMLElement>, path: string) => {
     if (onNavigate) {
       e.preventDefault();
       onNavigate(path);
