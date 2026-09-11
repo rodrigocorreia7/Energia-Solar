@@ -275,10 +275,10 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
           </video>
         </div>
 
-        {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados e proporcionais) */}
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 md:pt-32 text-center flex flex-col items-center">
+        {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados com espaço seguro do Header fixo) */}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-28 md:pt-32 text-center flex flex-col items-center">
 
-          <div className="relative w-full max-w-4xl min-h-[140px] sm:min-h-[220px] md:min-h-[380px]">
+          <div className="relative w-full max-w-4xl min-h-[130px] sm:min-h-[200px] md:min-h-[380px]">
             {stages.map((stage, index) => (
               <motion.div
                 key={stage.id}
@@ -287,12 +287,12 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
                 className={`absolute inset-x-0 top-0 flex flex-col items-center ${currentStage === index ? 'pointer-events-auto' : 'pointer-events-none'}`}
               >
                 {/* Headline Principal */}
-                <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.1] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.15] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
                   {stage.headline}
                 </h1>
 
                 {/* Sub-copy de Apoio */}
-                <p className="mt-2 sm:mt-5 text-sm sm:text-lg md:text-2xl text-slate-100 font-medium max-w-2xl text-pretty leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                <p className="mt-2 sm:mt-4 text-xs sm:text-base md:text-2xl text-slate-100 font-medium max-w-2xl text-pretty leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
                   {stage.subcopy}
                 </p>
 
