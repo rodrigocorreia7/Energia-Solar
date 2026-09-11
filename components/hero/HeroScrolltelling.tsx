@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -9,16 +9,53 @@ export interface HeroScrolltellingProps {
   onNavigate?: (path: string) => void;
 }
 
+const VIDEO_SCROLL_END_PROGRESS = 0.90;
+
 export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentStage, setCurrentStage] = useState<number>(0);
   const currentStageRef = useRef<number>(0);
-  const durationRef = useRef<number>(7.66);
+  const durationRef = useRef<number>(13.35);
   const isSeekingRef = useRef<boolean>(false);
   const targetTimeRef = useRef<number>(0);
   const seekRafRef = useRef<number | null>(null);
   const seekTimeoutRef = useRef<number | null>(null);
+
+  // Progresso bruto da rolagem
+  const rawProgressValue = useMotionValue(0);
+
+  // Progresso amortecido com mola física para máxima suavidade (elimina qualquer travamento de scroll)
+  const smoothProgressValue = useSpring(rawProgressValue, {
+    damping: 26,
+    stiffness: 85,
+    mass: 0.35,
+    restDelta: 0.0005,
+  });
+
+  // Estágio 0: "DE DIA O SOL TRABALHA PARA VOCÊ"
+  const stage0Opacity = useTransform(smoothProgressValue, [0, 0.22, 0.36], [1, 1, 0]);
+  const stage0Y = useTransform(smoothProgressValue, [0, 0.22, 0.36], [0, 0, -22]);
+  const stage0Scale = useTransform(smoothProgressValue, [0, 0.22, 0.36], [1, 1, 0.97]);
+  const stage0Blur = useTransform(smoothProgressValue, [0, 0.22, 0.36], ['blur(0px)', 'blur(0px)', 'blur(3px)']);
+
+  // Estágio 1: "SEU TELHADO VIRA USINA"
+  const stage1Opacity = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [0, 1, 1, 0]);
+  const stage1Y = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [22, 0, 0, -22]);
+  const stage1Scale = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [0.97, 1, 1, 0.97]);
+  const stage1Blur = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], ['blur(3px)', 'blur(0px)', 'blur(0px)', 'blur(3px)']);
+
+  // Estágio 2: "DE NOITE VOCÊ USUFRUI"
+  const stage2Opacity = useTransform(smoothProgressValue, [0.62, 0.74, 1], [0, 1, 1]);
+  const stage2Y = useTransform(smoothProgressValue, [0.62, 0.74, 1], [22, 0, 0]);
+  const stage2Scale = useTransform(smoothProgressValue, [0.62, 0.74, 1], [0.97, 1, 1]);
+  const stage2Blur = useTransform(smoothProgressValue, [0.62, 0.74, 1], ['blur(3px)', 'blur(0px)', 'blur(0px)']);
+
+  const stageMotionStyles = [
+    { opacity: stage0Opacity, y: stage0Y, scale: stage0Scale, filter: stage0Blur },
+    { opacity: stage1Opacity, y: stage1Y, scale: stage1Scale, filter: stage1Blur },
+    { opacity: stage2Opacity, y: stage2Y, scale: stage2Scale, filter: stage2Blur },
+  ];
 
   // Agendador de busca no vídeo desacoplado e não-bloqueante
   const scheduleSeek = useCallback(() => {
@@ -29,27 +66,25 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       const v = videoRef.current;
       if (!v || v.readyState < 1) return;
 
-      // Se o player já está no meio de um seek físico, não interrompe para não congelar o decodificador
       if (isSeekingRef.current || v.seeking) return;
 
-      const duration = durationRef.current || 7.66;
+      const duration = durationRef.current || 13.35;
       const target = Math.max(0, Math.min(duration, targetTimeRef.current));
       const diff = Math.abs(v.currentTime - target);
 
-      // Limiar suave: só busca se a diferença for maior que 0.04s (~1 frame)
-      if (diff >= 0.04) {
+      // Com keyframes densos a cada 3 frames, busca de forma instantânea
+      if (diff >= 0.03) {
         try {
           isSeekingRef.current = true;
 
-          // Timeout de segurança para destravar caso o navegador demore ou engula o evento seeked
           if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
           seekTimeoutRef.current = window.setTimeout(() => {
             isSeekingRef.current = false;
             const curV = videoRef.current;
-            if (curV && Math.abs(curV.currentTime - targetTimeRef.current) >= 0.05) {
+            if (curV && Math.abs(curV.currentTime - targetTimeRef.current) >= 0.04) {
               scheduleSeek();
             }
-          }, 120);
+          }, 75);
 
           if ('fastSeek' in v && typeof (v as any).fastSeek === 'function') {
             (v as any).fastSeek(target);
@@ -124,12 +159,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         isTicking = false;
         const currentScroll = window.scrollY - cachedTop;
         const progress = Math.max(0, Math.min(1, currentScroll / cachedScrollDistance));
+        const videoProgress = Math.min(1, progress / VIDEO_SCROLL_END_PROGRESS);
+        rawProgressValue.set(videoProgress);
 
-        // 3 Estágios bem distribuídos
+        // Sincroniza as frases com os momentos visuais do vídeo: dia, tarde e noite.
         let stage = 0;
-        if (progress < 0.35) {
+        if (videoProgress < 0.35) {
           stage = 0;
-        } else if (progress < 0.70) {
+        } else if (videoProgress < 0.70) {
           stage = 1;
         } else {
           stage = 2;
@@ -140,9 +177,8 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
           setCurrentStage(stage);
         }
 
-        // Scrub do vídeo: percorre de 0s até 7.66s nos primeiros 85% do percurso
-        const duration = durationRef.current || 7.66;
-        const videoProgress = Math.min(1, progress / 0.85);
+        // Scrub do vídeo: percorre a linha do tempo antes do final do hero e segura o frame noturno.
+        const duration = durationRef.current || 13.35;
         targetTimeRef.current = videoProgress * duration;
         scheduleSeek();
       });
@@ -195,14 +231,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       headline: 'DE DIA O SOL TRABALHA PARA VOCÊ.',
       subcopy: 'Todos os dias. Sem falhar. Grátis.',
       shortLabel: '01. DE DIA',
-      targetProgress: 0.1,
+      targetProgress: 0.10,
     },
     {
-      id: 'usina',
+      id: 'tarde',
       headline: 'SEU TELHADO VIRA USINA',
       subcopy: 'Cada raio vira crédito em sua conta Coelba.',
-      shortLabel: '02. SEU TELHADO',
-      targetProgress: 0.5,
+      shortLabel: '02. TARDE',
+      targetProgress: 0.50,
     },
     {
       id: 'noite',
@@ -214,12 +250,10 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     },
   ];
 
-  const activeStageData = stages[currentStage] || stages[0];
-
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[240vh] bg-[#0A0D14]"
+      className="relative w-full h-[360vh] bg-[#0A0D14]"
       id="hero"
     >
       {/* Container Sticky (Prende na tela durante o scroll) */}
@@ -229,69 +263,69 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-black">
           <video
             ref={videoRef}
-            src="/Videos/video-hero-final.mp4"
+            src="/Videos/videofinal21_smooth.mp4"
             muted
             playsInline
             preload="auto"
             className="w-full h-full object-cover"
             aria-hidden="true"
-          />
+          >
+            <source src="/Videos/videofinal21_smooth.mp4" type="video/mp4" />
+            <source src="/Videos/videofinal21.mp4" type="video/mp4" />
+          </video>
         </div>
 
         {/* Camada 2: Conteúdo Superior (Headline e Sub-copy centralizados) */}
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 md:pt-32 text-center flex flex-col items-center">
-          
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={activeStageData.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -14 }}
-              transition={{ duration: 0.28, ease: 'easeOut' }}
-              className="flex flex-col items-center max-w-4xl"
-            >
-              {/* Headline Principal */}
-              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.08] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                {activeStageData.headline}
-              </h1>
 
-              {/* Sub-copy de Apoio */}
-              <p className="mt-4 sm:mt-5 text-base sm:text-xl md:text-2xl text-slate-100 font-medium max-w-2xl text-pretty leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-                {activeStageData.subcopy}
-              </p>
+          <div className="relative w-full max-w-4xl min-h-[260px] sm:min-h-[340px] md:min-h-[380px]">
+            {stages.map((stage, index) => (
+              <motion.div
+                key={stage.id}
+                style={stageMotionStyles[index]}
+                aria-hidden={currentStage !== index}
+                className={`absolute inset-x-0 top-0 flex flex-col items-center ${currentStage === index ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              >
+                {/* Headline Principal */}
+                <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-[1.08] text-balance drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                  {stage.headline}
+                </h1>
 
-              {/* CTA Vermelho Pulsante (Aparece no estágio final da noite) */}
-              {activeStageData.showCta && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto"
-                >
-                  <Button
-                    id="hero-scroll-btn-simular"
-                    size="lg"
-                    variant="primary"
-                    onClick={handleSimularClick}
-                    rightIcon={<ArrowRight className="w-5 h-5" />}
-                    aria-label="Simular Minha Economia na Calculadora Solar"
-                    className="w-full sm:w-auto text-base sm:text-lg font-black px-8 py-4.5 rounded-2xl bg-[#E51E25] hover:bg-[#c9181e] text-white shadow-[0_0_35px_rgba(229,30,37,0.65)] hover:shadow-[0_0_50px_rgba(229,30,37,0.85)] animate-pulse hover:animate-none transition-all cursor-pointer"
+                {/* Sub-copy de Apoio */}
+                <p className="mt-4 sm:mt-5 text-base sm:text-xl md:text-2xl text-slate-100 font-medium max-w-2xl text-pretty leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                  {stage.subcopy}
+                </p>
+
+                {/* CTA Vermelho Pulsante (Aparece no estágio final da noite) */}
+                {stage.showCta && (
+                  <motion.div
+                    className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto"
                   >
-                    Simular Minha Economia
-                  </Button>
+                    <Button
+                      id="hero-scroll-btn-simular"
+                      size="lg"
+                      variant="primary"
+                      onClick={handleSimularClick}
+                      rightIcon={<ArrowRight className="w-5 h-5" />}
+                      aria-label="Simular Minha Economia na Calculadora Solar"
+                      className="w-full sm:w-auto text-base sm:text-lg font-black px-8 py-4.5 rounded-2xl bg-[#E51E25] hover:bg-[#c9181e] text-white shadow-[0_0_35px_rgba(229,30,37,0.65)] hover:shadow-[0_0_50px_rgba(229,30,37,0.85)] animate-pulse hover:animate-none transition-all cursor-pointer"
+                    >
+                      Simular Minha Economia
+                    </Button>
 
-                  <a
-                    href="https://wa.me/5577991778723?text=Olá,%20Perutche%20Solar!%20Vi%20o%20site%20e%20gostaria%20de%20um%20orçamento%20para%20minha%20casa."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/30 font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>Falar no WhatsApp</span>
-                  </a>
-                </motion.div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                    <a
+                      href="https://wa.me/5577991778723?text=Olá,%20Perutche%20Solar!%20Vi%20o%20site%20e%20gostaria%20de%20um%20orçamento%20para%20minha%20casa."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/30 font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
+                    >
+                      <span>Falar no WhatsApp</span>
+                    </a>
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+          </div>
 
         </div>
 

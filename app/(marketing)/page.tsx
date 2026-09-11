@@ -25,6 +25,7 @@ import { ProvaSocial } from '../../components/sections/ProvaSocial';
 import { FAQ } from '../../components/sections/FAQ';
 import { WhatsAppFloat } from '../../components/ui/WhatsAppFloat';
 import { Button } from '../../components/ui/Button';
+import LightRays from '../../components/ui/LightRays';
 import { GUANAMBI_SOLAR_CONFIG } from '../../lib/solar/tariffs';
 
 export interface MarketingPageProps {
@@ -154,13 +155,30 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
       {/* 10. Seção de Fechamento */}
       <section
         id="fechamento"
-        className="py-20 md:py-24 relative overflow-hidden text-center border-t border-sky-100/80"
-        style={{
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 55%, #E0F2FE 100%)',
-        }}
+        className="py-24 md:py-32 relative overflow-hidden text-center bg-[#0B0F19] border-t border-slate-800"
       >
-        {/* Luz solar sutil amarelada de fundo */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-amber-200/25 blur-[120px] rounded-full pointer-events-none" />
+        {/* Efeito WebGL LightRays de Raios Solares com tom amarelado e foco interativo ao mouse */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#fffeb1"
+            raysSpeed={1}
+            lightSpread={0.6}
+            rayLength={2.3}
+            followMouse={true}
+            mouseInfluence={0.4}
+            noiseAmount={0}
+            distortion={0}
+            className="custom-rays"
+            pulsating={false}
+            fadeDistance={1.6}
+            saturation={0.9}
+          />
+        </div>
+
+        {/* Linha de luz brilhante na borda superior e glow solar sutil (igual ao bloco Como Funciona) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 sm:w-3/4 h-[2px] bg-gradient-to-r from-transparent via-amber-300 to-transparent shadow-[0_0_25px_#F59E0B] pointer-events-none z-10" />
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-10 bg-amber-400/25 blur-xl rounded-full pointer-events-none z-10" />
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           
@@ -170,9 +188,9 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 border border-red-200/80 text-xs font-bold text-[#E51E25] uppercase tracking-wider mb-6 shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-950/60 border border-red-500/40 text-xs font-bold text-red-400 uppercase tracking-wider mb-6 shadow-sm backdrop-blur-md"
           >
-            <Wrench className="w-3.5 h-3.5 text-[#E51E25]" />
+            <Wrench className="w-3.5 h-3.5 text-red-400" />
             <span>Instalação e manutenção elétrica</span>
           </motion.div>
 
@@ -182,7 +200,7 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-tight md:leading-[1.15]"
+            className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-tight md:leading-[1.15] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
           >
             Pronto para zerar sua conta de luz?
           </motion.h2>
@@ -192,7 +210,7 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
+            className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed"
           >
             Fale diretamente com os fundadores e engenheiros da Perutche Solar. Fazemos o estudo técnico de viabilidade e projeto personalizado sem nenhum custo para você.
           </motion.p>
@@ -211,7 +229,7 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chamar no WhatsApp para falar com engenharia da Perutche Solar"
-              className="w-full sm:w-auto min-h-[64px] inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl bg-[#E51E25] text-white hover:bg-[#C9161C] font-black text-base sm:text-lg shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200"
+              className="w-full sm:w-auto min-h-[64px] inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl bg-[#E51E25] text-white hover:bg-[#C9161C] font-black text-base sm:text-lg shadow-xl shadow-red-500/25 hover:shadow-[0_0_35px_rgba(229,30,37,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-400 cursor-pointer"
             >
               <PhoneCall className="w-5 h-5 text-white" />
               <span>Chamar no WhatsApp</span>
@@ -220,12 +238,12 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             <Button
               id="fechamento-btn-simulacao"
               size="lg"
-              variant="outline"
+              variant="outline-white"
               href="/simular"
               aria-label="Fazer simulação online de energia solar"
               onClick={handleSimularClick}
               rightIcon={<ArrowRight className="w-5 h-5" />}
-              className="w-full sm:w-auto min-h-[64px] px-8 sm:px-10 py-4.5 sm:py-5 !rounded-2xl font-black text-base sm:text-lg border-2 border-gray-300 hover:border-[#E51E25] hover:text-[#E51E25] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm"
+              className="w-full sm:w-auto min-h-[64px] px-8 sm:px-10 py-4.5 sm:py-5 !rounded-2xl font-black text-base sm:text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md cursor-pointer"
             >
               Fazer Simulação Online
             </Button>
@@ -237,37 +255,37 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-14 pt-10 border-t border-sky-200/60 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left"
+            className="mt-14 pt-10 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left"
           >
             {/* Endereço */}
-            <div className="bg-white/95 backdrop-blur-sm border border-gray-200/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-              <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
+            <div className="bg-[#131B2E]/80 backdrop-blur-md border border-slate-700/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-lg shadow-black/20 hover:border-amber-400/40 hover:bg-[#162035] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
                 <MapPin className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                   Sede Técnica
                 </span>
-                <p className="text-xs sm:text-sm font-semibold text-gray-900 mt-0.5 leading-snug">
+                <p className="text-xs sm:text-sm font-semibold text-white mt-0.5 leading-snug">
                   Rua Prof. Nilza Cardoso 510, Bairro Paraíso, Guanambi/BA
                 </p>
               </div>
             </div>
 
             {/* WhatsApp */}
-            <div className="bg-white/95 backdrop-blur-sm border border-gray-200/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-              <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
+            <div className="bg-[#131B2E]/80 backdrop-blur-md border border-slate-700/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-lg shadow-black/20 hover:border-amber-400/40 hover:bg-[#162035] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
                 <PhoneCall className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                   WhatsApp Oficial
                 </span>
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs sm:text-sm font-bold text-[#E51E25] mt-0.5 block hover:underline"
+                  className="text-xs sm:text-sm font-bold text-red-400 hover:text-red-300 mt-0.5 block hover:underline"
                 >
                   77 99177-8723
                 </a>
@@ -275,22 +293,22 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
             </div>
 
             {/* CNPJ */}
-            <div className="bg-white/95 backdrop-blur-sm border border-gray-200/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-              <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
+            <div className="bg-[#131B2E]/80 backdrop-blur-md border border-slate-700/80 p-5 rounded-2xl flex items-start gap-3.5 shadow-lg shadow-black/20 hover:border-amber-400/40 hover:bg-[#162035] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-[#E51E25] shrink-0 mt-0.5">
                 <Building2 className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                   Razão Social & CNPJ
                 </span>
-                <p className="text-xs sm:text-sm font-semibold text-gray-900 mt-0.5 font-mono">
+                <p className="text-xs sm:text-sm font-semibold text-white mt-0.5 font-mono">
                   29.782.244/0001-55
                 </p>
               </div>
             </div>
           </motion.div>
 
-          <p className="mt-8 text-xs text-gray-500">
+          <p className="mt-8 text-xs text-slate-400">
             Atendimento presencial em Guanambi, Caetité, Urandi, Pindaí, Candiba, Palmas de Monte Alto e todo o Sudoeste Baiano.
           </p>
 
