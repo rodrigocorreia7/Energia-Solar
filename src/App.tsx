@@ -4,6 +4,7 @@ import MarketingPage from '../app/(marketing)/page';
 import SimularPage from '../app/simular/page';
 import ProjetosPage from '../app/projetos/page';
 import { WhatsAppFloat } from '../components/ui/WhatsAppFloat';
+import { ChatbotChrisFloat } from '../components/ui/ChatbotChrisFloat';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -63,6 +64,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-[#111827] flex flex-col selection:bg-[#E51E25] selection:text-white">
       {renderContent()}
+      <ChatbotChrisFloat />
       <WhatsAppFloat />
     </div>
   );

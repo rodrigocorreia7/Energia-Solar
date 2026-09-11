@@ -277,8 +277,6 @@ export const ComoFunciona: React.FC<ComoFuncionaProps> = ({ onNavigate }) => {
 
       </div>
 
-      {/* Transição suave em gradiente na base para a Calculadora (#F9FAFB) */}
-      <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-b from-transparent via-[#F9FAFB]/50 to-[#F9FAFB] pointer-events-none z-0" />
     </section>
   );
 };

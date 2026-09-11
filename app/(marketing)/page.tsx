@@ -22,7 +22,6 @@ import { ComoFunciona } from '../../components/sections/ComoFunciona';
 import { CalculatorForm } from '../../components/calculator/CalculatorForm';
 import { KitsResidenciais } from '../../components/sections/KitsResidenciais';
 import { ProvaSocial } from '../../components/sections/ProvaSocial';
-import { ChatbotChris } from '../../components/sections/ChatbotChris';
 import { FAQ } from '../../components/sections/FAQ';
 import { WhatsAppFloat } from '../../components/ui/WhatsAppFloat';
 import { Button } from '../../components/ui/Button';
@@ -142,12 +141,7 @@ export default function MarketingPage({ onNavigate }: MarketingPageProps) {
         <SegmentosSolucoes onNavigate={onNavigate} />
       </div>
 
-      {/* 8. Chatbot Chris (IA Especialista Solar 24h) */}
-      <div id="chris-ai">
-        <ChatbotChris onNavigate={onNavigate} />
-      </div>
-
-      {/* 9. FAQ (dúvidas frequentes em accordion) */}
+      {/* 8. FAQ (dúvidas frequentes em accordion) */}
       <div id="faq">
         <FAQ onNavigate={onNavigate} />
       </div>
