@@ -39,30 +39,55 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
   ];
 
   const clientesCeramicas = [
-    'CERÂMICA GUANAMBI',
-    'CERÂMICA UNIÃO',
-    'CERÂMICA SÃO FRANCISCO',
-    'CERÂMICA PROGRESSO',
-    'CERÂMICA MODELO',
-    'CERÂMICA SANTA RITA',
-    'CERÂMICA ALVORADA',
-    'CERÂMICA PLANALTO',
-    'CERÂMICA BAHIA',
-    'CERÂMICA CENTRAL',
-    'CERÂMICA NORDESTE',
     'CERÂMICA SÃO JOSÉ',
+    'CERÂMICA SANTA RITA',
+    'CERÂMICA GUANAMBI',
+    'CERÂMICA BELA VISTA',
+    'CERÂMICA UNIÃO',
+    'CERÂMICA PARAÍSO',
+    'CERÂMICA NOSSA SENHORA',
+    'CERÂMICA BOM JESUS',
+    'CERÂMICA MONTE ALTO',
+    'CERÂMICA IRMÃOS PIRES',
   ];
 
   return (
     <section
       id="prova-social"
-      className="py-20 md:py-32 bg-white border-t border-gray-200 relative overflow-hidden text-[#111827]"
+      className="bg-white border-t border-gray-200 relative overflow-hidden text-[#111827]"
     >
+      {/* Faixa Rotativa de Cerâmicas Clientes no Topo (Full Width) */}
+      <div className="w-full bg-[#0B0F19] border-b border-slate-800/90 py-2.5 sm:py-3 relative overflow-hidden shadow-sm z-20">
+        {/* Efeito de fade nas extremidades */}
+        <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-[#0B0F19] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-[#0B0F19] to-transparent z-10 pointer-events-none" />
+
+        {/* Ticker contínuo infinito (Marquee) com velocidade otimizada */}
+        <motion.div
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{
+            duration: 16,
+            ease: 'linear',
+            repeat: Infinity,
+          }}
+          className="flex items-center whitespace-nowrap will-change-transform"
+        >
+          {[...clientesCeramicas, ...clientesCeramicas].map((cliente, idx) => (
+            <div key={idx} className="inline-flex items-center">
+              <span className="text-xs sm:text-[13px] font-black tracking-wider uppercase text-slate-100 font-sans">
+                {cliente}
+              </span>
+              <span className="mx-3.5 sm:mx-5 w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_8px_#F59E0B] shrink-0" />
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
       {/* Efeitos de luz de fundo */}
       <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#E51E25]/5 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-14 sm:pt-18 md:pt-20 pb-20 md:pb-32">
         
         {/* 1. Headline de Autoridade */}
         <motion.div
@@ -88,48 +113,53 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
           <p className="mt-5 text-sm sm:text-base text-[#4B5563] max-w-2xl mx-auto font-normal text-pretty">
             Não improvisamos. Trazemos o rigor técnico das maiores fábricas de cerâmica vermelha do Sudoeste Baiano diretamente para a sua residência.
           </p>
-
-          {/* Banner Horizontal Rotativo de Clientes (Idêntico ao design do usuário) */}
-          <div className="mt-8 sm:mt-10 max-w-3xl mx-auto">
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-full bg-[#111622] border border-slate-800/90 py-3 sm:py-3.5 px-4 shadow-xl shadow-black/25">
-              
-              {/* Efeito de fade nas extremidades para transição contínua */}
-              <div className="absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-[#111622] to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-[#111622] to-transparent z-10 pointer-events-none" />
-
-              {/* Ticker contínuo infinito (Marquee) com Framer Motion */}
-              <motion.div
-                animate={{ x: ['0%', '-50%'] }}
-                transition={{
-                  duration: 28,
-                  ease: 'linear',
-                  repeat: Infinity,
-                }}
-                className="flex items-center whitespace-nowrap will-change-transform"
-              >
-                {[...clientesCeramicas, ...clientesCeramicas].map((cliente, idx) => (
-                  <div key={idx} className="inline-flex items-center">
-                    <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-slate-100 font-sans drop-shadow-xs">
-                      {cliente}
-                    </span>
-                    <span className="mx-3.5 sm:mx-5 w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_8px_#F59E0B] shrink-0" />
-                  </div>
-                ))}
-              </motion.div>
-
-            </div>
-          </div>
         </motion.div>
 
-        {/* 2. Comparativo Visual (2 Colunas Lado a Lado no Desktop, Empilhado no Mobile) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-14">
+        {/* 2. Comparativo Visual (3 Colunas: Fundadores, Cerâmica B2B, Residência B2C) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch mb-14">
           
-          {/* Coluna 1 - Na Cerâmica (B2B) */}
+          {/* Coluna 1 - Os Fundadores (Presença Real em Cada Usina) */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
+            className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between relative min-h-[460px] sm:min-h-[500px]"
+          >
+            <div className="relative flex-1 w-full overflow-hidden">
+              <img
+                src="/Imagens/casal-donos.jpg"
+                alt="Fundadores da Perutche Solar entregando usina"
+                className="w-full h-full object-cover object-top"
+                loading="lazy"
+              />
+
+              {/* Tag dos Fundadores */}
+              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#0B0F19]/85 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider shadow">
+                Diretoria & Fundadores
+              </div>
+
+              {/* Overlay na base */}
+              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+
+              {/* Frase solicitada pelo usuário */}
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white">
+                <p className="text-sm sm:text-base font-black leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+                  Presença e compromisso real em cada usina entregue.
+                </p>
+                <span className="text-[11px] text-amber-300 font-bold block mt-1.5 drop-shadow">
+                  Perutche Solar • Guanambi & Região
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Coluna 2 - Na Cerâmica (B2B) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55, delay: 0.1 }}
             className="bg-[#F9FAFB] border border-gray-200 rounded-3xl p-7 sm:p-9 flex flex-col justify-between shadow-sm relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full blur-2xl pointer-events-none" />
@@ -172,12 +202,12 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
             </div>
           </motion.div>
 
-          {/* Coluna 2 - Na Sua Residência (B2C) - Destaque com Vermelho Suave */}
+          {/* Coluna 3 - Na Sua Residência (B2C) - Destaque com Vermelho Suave */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.55, delay: 0.2 }}
             className="bg-white border-2 border-[#E51E25] rounded-3xl p-7 sm:p-9 flex flex-col justify-between shadow-lg shadow-[#E51E25]/10 relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 px-4 py-1 rounded-bl-2xl bg-[#E51E25] text-white text-[10px] font-black uppercase tracking-wider shadow">
@@ -224,7 +254,7 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
 
         </div>
 
-        {/* 3. Badge de Destaque Centralizado */}
+        {/* 4. Badge de Destaque Centralizado */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}

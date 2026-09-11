@@ -39,7 +39,7 @@ export const CircularText: React.FC<CircularTextProps> = ({
   const letters = Array.from(text);
   const controls = useAnimation();
   const rotation: MotionValue<number> = useMotionValue(0);
-  const containerSize = (radius + 28) * 2;
+  const containerSize = (radius + 40) * 2;
 
   useEffect(() => {
     const start = rotation.get();
@@ -115,7 +115,7 @@ export const CircularText: React.FC<CircularTextProps> = ({
         return (
           <span
             key={i}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-block text-sm sm:text-base font-black tracking-widest uppercase transition-all duration-300 pointer-events-none text-white/95 group-hover:text-amber-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-block text-base sm:text-lg md:text-xl font-black font-[900] tracking-widest uppercase transition-all duration-300 pointer-events-none text-white group-hover:text-amber-300 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] drop-shadow-[0_0_16px_rgba(251,191,36,0.6)]"
             style={{
               transform,
               WebkitTransform: transform
