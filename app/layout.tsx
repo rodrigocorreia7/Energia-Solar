@@ -24,6 +24,14 @@ export const metadata: Metadata = {
     'Zere sua conta de luz com energia solar. 72+ cerâmicas atendidas desde 2018. Financiamento em 84x. Rua Nilza Cardoso 510, Guanambi.',
   keywords: ['energia solar guanambi', 'placa solar bahia', 'energia solar residencial'],
   authors: [{ name: 'Perutche Solar' }],
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     title: 'Perutche Solar - Energia Solar em Guanambi',
     description: 'Zere sua conta de luz com energia solar',
@@ -41,6 +49,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${inter.variable} ${jakarta.variable}`}>
       <head>
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="shortcut icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
