@@ -71,13 +71,16 @@ export const ComoFunciona: React.FC<ComoFuncionaProps> = ({ onNavigate }) => {
 
       <div className="w-full max-w-[96vw] xl:max-w-7xl 2xl:max-w-[1540px] mx-auto px-2 sm:px-4 md:px-6 lg:px-8 relative z-10">
         
-        {/* Efeito Circular PERUTCHE-SOLAR- no espaço entre as seções */}
-        <div className="flex justify-center items-center pt-2 pb-6 relative z-30">
+        {/* Efeito Circular PERUTCHE-SOLAR- posicionado diretamente em cima da ponta do raio */}
+        <div className="flex justify-center items-center relative z-30 -mb-[118px] sm:-mb-[128px] md:-mb-[138px] pointer-events-auto">
+          {/* Halo solar suave no centro do círculo */}
+          <div className="absolute w-44 sm:w-56 h-44 sm:h-56 bg-amber-400/20 blur-3xl rounded-full pointer-events-none" />
           <CircularText
             text="PERUTCHE-SOLAR-"
             onHover="slowDown"
             spinDuration={11}
-            className="text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]"
+            radius={95}
+            className="text-white drop-shadow-[0_0_25px_rgba(251,191,36,0.65)]"
           />
         </div>
 
@@ -93,7 +96,7 @@ export const ComoFunciona: React.FC<ComoFuncionaProps> = ({ onNavigate }) => {
             mouseTiltStrength={0.015}
             flowSpeed={0.35}
           />
-          {/* Halo de dispersão no topo */}
+          {/* Halo de dispersão no topo onde o feixe encontra o círculo */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 bg-amber-400/25 blur-2xl rounded-full pointer-events-none" />
           {/* Glow horizontal onde o feixe toca a borda do quadrado */}
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[480px] sm:w-[720px] md:w-[960px] h-[18px] bg-gradient-to-r from-transparent via-amber-300 to-transparent blur-lg rounded-full pointer-events-none" />

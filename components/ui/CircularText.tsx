@@ -34,11 +34,12 @@ export const CircularText: React.FC<CircularTextProps> = ({
   spinDuration = 20,
   onHover = 'speedUp',
   className = '',
-  radius = 62
+  radius = 95
 }) => {
   const letters = Array.from(text);
   const controls = useAnimation();
   const rotation: MotionValue<number> = useMotionValue(0);
+  const containerSize = (radius + 28) * 2;
 
   useEffect(() => {
     const start = rotation.get();
@@ -96,8 +97,12 @@ export const CircularText: React.FC<CircularTextProps> = ({
 
   return (
     <motion.div
-      className={`m-0 mx-auto rounded-full w-[160px] h-[160px] relative font-black text-white text-center cursor-pointer origin-center select-none group ${className}`}
-      style={{ rotate: rotation }}
+      className={`m-0 mx-auto rounded-full relative font-black text-white text-center cursor-pointer origin-center select-none group ${className}`}
+      style={{
+        rotate: rotation,
+        width: containerSize,
+        height: containerSize
+      }}
       initial={{ rotate: 0 }}
       animate={controls}
       onMouseEnter={handleHoverStart}
@@ -110,7 +115,7 @@ export const CircularText: React.FC<CircularTextProps> = ({
         return (
           <span
             key={i}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-block text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-300 pointer-events-none text-white/90 group-hover:text-amber-300"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-block text-sm sm:text-base font-black tracking-widest uppercase transition-all duration-300 pointer-events-none text-white/95 group-hover:text-amber-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
             style={{
               transform,
               WebkitTransform: transform
