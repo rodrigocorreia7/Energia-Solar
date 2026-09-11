@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
 
 export type RaysOrigin =
@@ -85,7 +85,7 @@ interface Uniforms {
   lightMode: { value: number };
 }
 
-const LightRays: React.FC<LightRaysProps> = ({
+export const LightRays: React.FC<LightRaysProps> = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
   raysSpeed = 1,
@@ -108,62 +108,37 @@ const LightRays: React.FC<LightRaysProps> = ({
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
   const animationIdRef = useRef<number | null>(null);
   const meshRef = useRef<Mesh | null>(null);
-  const cleanupFunctionRef = useRef<(() => void) | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const inViewRef = useRef<boolean>(true);
 
+  // Inicialização estável do WebGL
   useEffect(() => {
     if (!containerRef.current) return;
 
-    observerRef.current = new IntersectionObserver(
-      entries => {
-        const entry = entries[0];
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
+    let destroyed = false;
+    let resizeObserver: ResizeObserver | null = null;
 
-    observerRef.current.observe(containerRef.current);
+    const renderer = new Renderer({
+      dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2),
+      alpha: true,
+      premultipliedAlpha: true
+    });
+    rendererRef.current = renderer;
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
-    };
-  }, []);
+    const gl = renderer.gl;
+    gl.canvas.style.position = 'absolute';
+    gl.canvas.style.top = '0';
+    gl.canvas.style.left = '0';
+    gl.canvas.style.width = '100%';
+    gl.canvas.style.height = '100%';
+    gl.canvas.style.display = 'block';
+    gl.canvas.style.pointerEvents = 'none';
 
-  useEffect(() => {
-    if (!isVisible || !containerRef.current) return;
-
-    if (cleanupFunctionRef.current) {
-      cleanupFunctionRef.current();
-      cleanupFunctionRef.current = null;
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
     }
+    containerRef.current.appendChild(gl.canvas);
 
-    const initializeWebGL = async () => {
-      if (!containerRef.current) return;
-
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      if (!containerRef.current) return;
-
-      const renderer = new Renderer({
-        dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2),
-        alpha: true
-      });
-      rendererRef.current = renderer;
-
-      const gl = renderer.gl;
-      gl.canvas.style.width = '100%';
-      gl.canvas.style.height = '100%';
-
-      while (containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
-      }
-      containerRef.current.appendChild(gl.canvas);
-
-      const vert = `
+    const vert = `
 attribute vec2 position;
 varying vec2 vUv;
 void main() {
@@ -171,7 +146,7 @@ void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }`;
 
-      const frag = `precision highp float;
+    const frag = `precision highp float;
 
 uniform float iTime;
 uniform vec2  iResolution;
@@ -208,10 +183,10 @@ float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord,
   float spreadFactor = pow(max(distortedAngle, 0.0), 1.0 / max(lightSpread, 0.001));
 
   float distance = length(sourceToCoord);
-  float maxDistance = iResolution.x * rayLength;
+  float maxDistance = max(iResolution.x, 100.0) * rayLength;
   float lengthFalloff = clamp((maxDistance - distance) / maxDistance, 0.0, 1.0);
   
-  float fadeFalloff = clamp((iResolution.x * fadeDistance - distance) / (iResolution.x * fadeDistance), 0.5, 1.0);
+  float fadeFalloff = clamp((max(iResolution.x, 100.0) * fadeDistance - distance) / (max(iResolution.x, 100.0) * fadeDistance), 0.5, 1.0);
   float pulse = pulsating > 0.5 ? (0.8 + 0.2 * sin(iTime * speed * 3.0)) : 1.0;
 
   float baseStrength = clamp(
@@ -247,7 +222,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor.rgb *= (1.0 - noiseAmount + noiseAmount * n);
   }
 
-  float brightness = 1.0 - (coord.y / iResolution.y);
+  float brightness = 1.0 - (coord.y / max(iResolution.y, 1.0));
   fragColor.x *= 0.1 + brightness * 0.8;
   fragColor.y *= 0.3 + brightness * 0.6;
   fragColor.z *= 0.5 + brightness * 0.5;
@@ -260,8 +235,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   fragColor.rgb *= raysColor;
 
   if (lightMode > 0.5) {
-    vec3 mapped = vec3(1.0) - exp(-max(fragColor.rgb, vec3(0.0)) * 1.35);
-    float energy = clamp(max(mapped.r, max(mapped.g, max(mapped.b))), 0.0, 1.0);
+    vec3 clampedColor = max(fragColor.rgb, 0.0);
+    vec3 mapped = vec3(1.0) - exp(-clampedColor * 1.35);
+    float maxVal = max(mapped.x, mapped.y);
+    maxVal = max(maxVal, mapped.z);
+    float energy = clamp(maxVal, 0.0, 1.0);
     vec3 hue = mapped / max(energy, 0.0001);
     vec3 ink = mix(hue * 0.25, hue * 0.72, energy);
     fragColor = vec4(mix(vec3(1.0), ink, energy), 1.0);
@@ -271,143 +249,151 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 void main() {
   vec4 color;
   mainImage(color, gl_FragCoord.xy);
-  gl_FragColor  = color;
+  gl_FragColor = color;
 }`;
 
-      const uniforms: Uniforms = {
-        iTime: { value: 0 },
-        iResolution: { value: [1, 1] },
+    const uniforms: Uniforms = {
+      iTime: { value: 0 },
+      iResolution: { value: [800, 600] },
 
-        rayPos: { value: [0, 0] },
-        rayDir: { value: [0, 1] },
+      rayPos: { value: [0, 0] },
+      rayDir: { value: [0, 1] },
 
-        raysColor: { value: hexToRgb(raysColor) },
-        raysSpeed: { value: raysSpeed },
-        lightSpread: { value: lightSpread },
-        rayLength: { value: rayLength },
-        pulsating: { value: pulsating ? 1.0 : 0.0 },
-        fadeDistance: { value: fadeDistance },
-        saturation: { value: saturation },
-        mousePos: { value: [0.5, 0.5] },
-        mouseInfluence: { value: mouseInfluence },
-        noiseAmount: { value: noiseAmount },
-        distortion: { value: distortion },
-        lightMode: { value: lightMode ? 1.0 : 0.0 }
-      };
-      uniformsRef.current = uniforms;
+      raysColor: { value: hexToRgb(raysColor) },
+      raysSpeed: { value: raysSpeed },
+      lightSpread: { value: lightSpread },
+      rayLength: { value: rayLength },
+      pulsating: { value: pulsating ? 1.0 : 0.0 },
+      fadeDistance: { value: fadeDistance },
+      saturation: { value: saturation },
+      mousePos: { value: [0.5, 0.5] },
+      mouseInfluence: { value: mouseInfluence },
+      noiseAmount: { value: noiseAmount },
+      distortion: { value: distortion },
+      lightMode: { value: lightMode ? 1.0 : 0.0 }
+    };
+    uniformsRef.current = uniforms;
 
-      const geometry = new Triangle(gl);
-      const program = new Program(gl, {
-        vertex: vert,
-        fragment: frag,
-        uniforms
-      });
-      const mesh = new Mesh(gl, { geometry, program });
-      meshRef.current = mesh;
+    const geometry = new Triangle(gl);
+    const program = new Program(gl, {
+      vertex: vert,
+      fragment: frag,
+      uniforms,
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+    });
+    const mesh = new Mesh(gl, { geometry, program });
+    meshRef.current = mesh;
 
-      const updatePlacement = () => {
-        if (!containerRef.current || !renderer) return;
+    const updatePlacement = () => {
+      if (!containerRef.current || !renderer || destroyed) return;
 
-        renderer.dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2);
+      renderer.dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2);
 
-        const { clientWidth: wCSS, clientHeight: hCSS } = containerRef.current;
-        renderer.setSize(wCSS, hCSS);
+      const rect = containerRef.current.getBoundingClientRect();
+      const wCSS = containerRef.current.clientWidth || rect.width || window.innerWidth;
+      const hCSS = containerRef.current.clientHeight || rect.height || 600;
 
-        const dpr = renderer.dpr;
-        const w = wCSS * dpr;
-        const h = hCSS * dpr;
+      if (wCSS <= 0 || hCSS <= 0) return;
 
-        uniforms.iResolution.value = [w, h];
+      renderer.setSize(wCSS, hCSS);
 
-        const { anchor, dir } = getAnchorAndDir(raysOrigin, w, h);
-        uniforms.rayPos.value = anchor;
-        uniforms.rayDir.value = dir;
-      };
+      const dpr = renderer.dpr;
+      const w = wCSS * dpr;
+      const h = hCSS * dpr;
 
-      const loop = (t: number) => {
-        if (!rendererRef.current || !uniformsRef.current || !meshRef.current) {
-          return;
-        }
+      uniforms.iResolution.value = [w, h];
 
-        uniforms.iTime.value = t * 0.001;
-
-        if (followMouse && mouseInfluence > 0.0) {
-          const smoothing = 0.92;
-
-          smoothMouseRef.current.x = smoothMouseRef.current.x * smoothing + mouseRef.current.x * (1 - smoothing);
-          smoothMouseRef.current.y = smoothMouseRef.current.y * smoothing + mouseRef.current.y * (1 - smoothing);
-
-          uniforms.mousePos.value = [smoothMouseRef.current.x, smoothMouseRef.current.y];
-        }
-
-        try {
-          renderer.render({ scene: mesh });
-          animationIdRef.current = requestAnimationFrame(loop);
-        } catch (error) {
-          console.warn('WebGL rendering error:', error);
-          return;
-        }
-      };
-
-      window.addEventListener('resize', updatePlacement);
-      updatePlacement();
-      animationIdRef.current = requestAnimationFrame(loop);
-
-      cleanupFunctionRef.current = () => {
-        if (animationIdRef.current) {
-          cancelAnimationFrame(animationIdRef.current);
-          animationIdRef.current = null;
-        }
-
-        window.removeEventListener('resize', updatePlacement);
-
-        if (renderer) {
-          try {
-            const canvas = renderer.gl.canvas;
-            const loseContextExt = renderer.gl.getExtension('WEBGL_lose_context');
-            if (loseContextExt) {
-              loseContextExt.loseContext();
-            }
-
-            if (canvas && canvas.parentNode) {
-              canvas.parentNode.removeChild(canvas);
-            }
-          } catch (error) {
-            console.warn('Error during WebGL cleanup:', error);
-          }
-        }
-
-        rendererRef.current = null;
-        uniformsRef.current = null;
-        meshRef.current = null;
-      };
+      const { anchor, dir } = getAnchorAndDir(raysOrigin, w, h);
+      uniforms.rayPos.value = anchor;
+      uniforms.rayDir.value = dir;
     };
 
-    initializeWebGL();
+    updatePlacement();
+
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updatePlacement();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    const io = new IntersectionObserver(
+      entries => {
+        inViewRef.current = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0 }
+    );
+    io.observe(containerRef.current);
+
+    const loop = (t: number) => {
+      if (destroyed || !rendererRef.current || !uniformsRef.current || !meshRef.current) {
+        return;
+      }
+
+      // Se fora de vista, aguarda sem sobrecarregar GPU
+      if (!inViewRef.current) {
+        animationIdRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      uniforms.iTime.value = t * 0.001;
+
+      // Se resolução ainda não foi calibrada pelo DOM, reavalia
+      if (uniforms.iResolution.value[0] <= 10) {
+        updatePlacement();
+      }
+
+      if (followMouse && mouseInfluence > 0.0) {
+        const smoothing = 0.92;
+        smoothMouseRef.current.x = smoothMouseRef.current.x * smoothing + mouseRef.current.x * (1 - smoothing);
+        smoothMouseRef.current.y = smoothMouseRef.current.y * smoothing + mouseRef.current.y * (1 - smoothing);
+        uniforms.mousePos.value = [smoothMouseRef.current.x, smoothMouseRef.current.y];
+      }
+
+      try {
+        renderer.render({ scene: mesh });
+      } catch (error) {
+        console.warn('WebGL rendering error:', error);
+      }
+
+      animationIdRef.current = requestAnimationFrame(loop);
+    };
+
+    window.addEventListener('resize', updatePlacement);
+    animationIdRef.current = requestAnimationFrame(loop);
 
     return () => {
-      if (cleanupFunctionRef.current) {
-        cleanupFunctionRef.current();
-        cleanupFunctionRef.current = null;
+      destroyed = true;
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
       }
-    };
-  }, [
-    isVisible,
-    raysOrigin,
-    raysColor,
-    raysSpeed,
-    lightSpread,
-    rayLength,
-    pulsating,
-    fadeDistance,
-    saturation,
-    followMouse,
-    mouseInfluence,
-    noiseAmount,
-    distortion,
-    lightMode
-  ]);
+      window.removeEventListener('resize', updatePlacement);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      io.disconnect();
 
+      if (renderer) {
+        try {
+          const canvas = renderer.gl.canvas;
+          if (canvas && canvas.parentNode) {
+            canvas.parentNode.removeChild(canvas);
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      rendererRef.current = null;
+      uniformsRef.current = null;
+      meshRef.current = null;
+    };
+  }, [raysOrigin, followMouse]);
+
+  // Atualização dinâmica de uniforms em runtime sem desmontar o WebGL
   useEffect(() => {
     if (!uniformsRef.current || !containerRef.current || !rendererRef.current) return;
 
@@ -426,7 +412,9 @@ void main() {
     u.distortion.value = distortion;
     u.lightMode.value = lightMode ? 1.0 : 0.0;
 
-    const { clientWidth: wCSS, clientHeight: hCSS } = containerRef.current;
+    const rect = containerRef.current.getBoundingClientRect();
+    const wCSS = containerRef.current.clientWidth || rect.width || window.innerWidth;
+    const hCSS = containerRef.current.clientHeight || rect.height || 600;
     const dpr = renderer.dpr;
     const { anchor, dir } = getAnchorAndDir(raysOrigin, wCSS * dpr, hCSS * dpr);
     u.rayPos.value = anchor;
@@ -446,17 +434,18 @@ void main() {
     lightMode
   ]);
 
+  // Rastreamento suave do mouse
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current || !rendererRef.current) return;
+      if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      mouseRef.current = { x, y };
+      const x = (e.clientX - rect.left) / Math.max(rect.width, 1);
+      const y = (e.clientY - rect.top) / Math.max(rect.height, 1);
+      mouseRef.current = { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
     };
 
     if (followMouse) {
-      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
       return () => window.removeEventListener('mousemove', handleMouseMove);
     }
   }, [followMouse]);
@@ -465,6 +454,7 @@ void main() {
     <div
       ref={containerRef}
       className={`w-full h-full pointer-events-none z-[3] overflow-hidden relative ${className}`.trim()}
+      style={{ minHeight: '100%' }}
     />
   );
 };
