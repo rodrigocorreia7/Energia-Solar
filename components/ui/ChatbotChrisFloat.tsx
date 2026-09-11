@@ -203,20 +203,20 @@ export const ChatbotChrisFloat: React.FC = () => {
           <div className="relative">
             {/* Chris 3D Pop-up Avatar emergindo por trás da borda superior */}
             <motion.div
-              initial={{ y: 45, opacity: 0, scale: 0.85 }}
+              initial={{ y: 50, opacity: 0, scale: 0.85 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 35, opacity: 0, scale: 0.85 }}
               transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-              className="absolute -top-[102px] sm:-top-[118px] left-1/2 -translate-x-1/2 pointer-events-none z-0 flex justify-center w-36 sm:w-44"
+              className="absolute -top-[160px] sm:-top-[185px] left-1/2 -translate-x-1/2 pointer-events-none z-0 flex justify-center w-36 sm:w-44"
             >
               <div className="relative">
                 <img
                   src="/Imagens/chatbot-avatar.png"
                   alt="Chris - Consultor IA Perutche Solar"
-                  className="w-32 sm:w-40 h-auto drop-shadow-[0_16px_32px_rgba(0,0,0,0.65)] object-contain"
+                  className="w-32 sm:w-38 h-auto drop-shadow-[0_16px_32px_rgba(0,0,0,0.65)] object-contain"
                 />
                 {/* Glow sutil atrás da cabeça */}
-                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-blue-500/20 rounded-full blur-2xl pointer-events-none -z-10" />
+                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-blue-500/25 rounded-full blur-2xl pointer-events-none -z-10" />
               </div>
             </motion.div>
 
@@ -226,7 +226,7 @@ export const ChatbotChrisFloat: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative z-10 w-[350px] sm:w-[390px] max-w-[calc(100vw-24px)] h-[510px] sm:h-[550px] max-h-[calc(100dvh-165px)] rounded-2xl sm:rounded-3xl bg-[#0B132B] border border-blue-500/30 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden mb-3.5 backdrop-blur-xl"
+              className="relative z-10 w-[350px] sm:w-[390px] max-w-[calc(100vw-24px)] h-[440px] sm:h-[480px] max-h-[calc(100dvh-230px)] rounded-2xl sm:rounded-3xl bg-[#0B132B] border border-blue-500/30 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden mb-3.5 backdrop-blur-xl"
             >
               {/* Header do Chat */}
               <div className="bg-[#0D1838] border-b border-white/10 px-4 py-3 sm:py-3.5 flex items-center justify-between relative z-20">

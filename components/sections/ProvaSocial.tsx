@@ -124,30 +124,39 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
-            className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between relative min-h-[460px] sm:min-h-[500px]"
+            className="bg-[#0B0F19] border border-gray-200 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between relative"
           >
-            <div className="relative flex-1 w-full overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden min-h-[420px] sm:min-h-[440px]">
+              {/* Efeito de preenchimento ambiente suave ao fundo */}
               <img
                 src="/Imagens/casal-donos.jpg"
-                alt="Fundadores da Perutche Solar entregando usina"
-                className="w-full h-full object-cover object-top"
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-35 scale-110 pointer-events-none"
+              />
+
+              {/* Imagem principal 100% visível, garantindo que todos apareçam sem nenhum corte */}
+              <img
+                src="/Imagens/casal-donos.jpg"
+                alt="Diretoria da Perutche Solar entregando usina com cliente"
+                className="relative z-10 w-full h-full object-contain object-center"
                 loading="lazy"
               />
 
               {/* Tag dos Fundadores */}
-              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#0B0F19]/85 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider shadow">
+              <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-[#0B0F19]/85 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider shadow">
                 Diretoria & Fundadores
               </div>
 
               {/* Overlay na base */}
-              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-32 z-10 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
 
               {/* Frase solicitada pelo usuário */}
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white">
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white z-20">
                 <p className="text-sm sm:text-base font-black leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
                   Presença e compromisso real em cada usina entregue.
                 </p>
-                <span className="text-[11px] text-amber-300 font-bold block mt-1.5 drop-shadow">
+                <span className="text-[11px] text-amber-300 font-bold block mt-1 drop-shadow">
                   Perutche Solar • Guanambi & Região
                 </span>
               </div>
@@ -160,35 +169,35 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.1 }}
-            className="bg-[#F9FAFB] border border-gray-200 rounded-3xl p-7 sm:p-9 flex flex-col justify-between shadow-sm relative overflow-hidden"
+            className="bg-[#F9FAFB] border border-gray-200 rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-sm relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full blur-2xl pointer-events-none" />
 
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
-                  <Factory className="w-6 h-6 text-gray-600" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
+                  <Factory className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
                     Ambiente Severo • B2B
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                  <h3 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
                     Nas 72 cerâmicas que atendemos:
                   </h3>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-600 mb-5 leading-relaxed">
                 Operações 24 horas por dia em ambiente de pó abrasivo, alta temperatura e picos gigantescos de demanda elétrica:
               </p>
 
               {/* Lista com ícones */}
-              <ul className="space-y-4">
+              <ul className="space-y-3 sm:space-y-3.5">
                 {cerâmicaItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-gray-700">
-                    <div className="size-5 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="size-3.5 text-[#F59E0B]" strokeWidth={2} />
+                  <li key={item} className="flex items-start gap-3 text-xs sm:text-sm text-gray-700">
+                    <div className="size-4.5 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="size-3 text-[#F59E0B]" strokeWidth={2.5} />
                     </div>
                     <span className="font-medium">{item}</span>
                   </li>
@@ -196,7 +205,7 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
               </ul>
             </div>
 
-            <div className="mt-8 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500 font-mono">
+            <div className="mt-6 pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500 font-mono">
               <span>Nível de exigência técnica:</span>
               <span className="text-amber-700 font-bold uppercase">Industrial Máximo</span>
             </div>
@@ -208,37 +217,37 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.2 }}
-            className="bg-white border-2 border-[#E51E25] rounded-3xl p-7 sm:p-9 flex flex-col justify-between shadow-lg shadow-[#E51E25]/10 relative overflow-hidden"
+            className="bg-white border-2 border-[#E51E25] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg shadow-[#E51E25]/10 relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 px-4 py-1 rounded-bl-2xl bg-[#E51E25] text-white text-[10px] font-black uppercase tracking-wider shadow">
               Padrão Ouro Perutche
             </div>
 
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#E51E25]">
-                  <Home className="w-6 h-6 text-[#E51E25]" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#E51E25]">
+                  <Home className="w-5 h-5 text-[#E51E25]" />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-[#E51E25] uppercase tracking-wider block">
                     Conforto & Segurança • B2C
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                  <h3 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
                     Na sua casa:
                   </h3>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-600 mb-5 leading-relaxed">
                 Toda essa tecnologia refinada para garantir zero vazamento, zero dor de cabeça e economia imediata na conta:
               </p>
 
               {/* Lista com ícones verdes */}
-              <ul className="space-y-4">
+              <ul className="space-y-3 sm:space-y-3.5">
                 {residenciaItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-gray-800">
-                    <div className="size-5 rounded-full bg-emerald-50 border border-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="size-3.5 text-emerald-600" strokeWidth={2} />
+                  <li key={item} className="flex items-start gap-3 text-xs sm:text-sm text-gray-800">
+                    <div className="size-4.5 rounded-full bg-emerald-50 border border-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="size-3 text-emerald-600" strokeWidth={2.5} />
                     </div>
                     <span className="font-semibold">{item}</span>
                   </li>
@@ -246,7 +255,7 @@ export const ProvaSocial: React.FC<ProvaSocialProps> = ({ onNavigate }) => {
               </ul>
             </div>
 
-            <div className="mt-8 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500 font-mono">
+            <div className="mt-6 pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500 font-mono">
               <span>Garantia de vedação e fixação:</span>
               <span className="text-emerald-700 font-bold uppercase">100% Blindada</span>
             </div>
