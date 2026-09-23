@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -22,7 +22,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
   const seekRafRef = useRef<number | null>(null);
   const seekTimeoutRef = useRef<number | null>(null);
 
-  // Progresso bruto da rolagem
+  // O progresso bruto recebe a rolagem; o valor com mola guia texto e vídeo juntos.
   const rawProgressValue = useMotionValue(0);
 
   // Progresso amortecido com mola física para máxima suavidade (elimina qualquer travamento de scroll)
@@ -33,23 +33,23 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     restDelta: 0.0005,
   });
 
-  // Estágio 0: "DE DIA O SOL TRABALHA PARA VOCÊ"
-  const stage0Opacity = useTransform(smoothProgressValue, [0, 0.22, 0.36], [1, 1, 0]);
-  const stage0Y = useTransform(smoothProgressValue, [0, 0.22, 0.36], [0, 0, -22]);
-  const stage0Scale = useTransform(smoothProgressValue, [0, 0.22, 0.36], [1, 1, 0.97]);
-  const stage0Blur = useTransform(smoothProgressValue, [0, 0.22, 0.36], ['blur(0px)', 'blur(0px)', 'blur(3px)']);
+  // Os pontos acompanham as mudanças de luz do arquivo de vídeo: dia, tarde e noite.
+  const stage0Opacity = useTransform(smoothProgressValue, [0, 0.23, 0.33], [1, 1, 0]);
+  const stage0Y = useTransform(smoothProgressValue, [0, 0.23, 0.33], [0, 0, -22]);
+  const stage0Scale = useTransform(smoothProgressValue, [0, 0.23, 0.33], [1, 1, 0.97]);
+  const stage0Blur = useTransform(smoothProgressValue, [0, 0.23, 0.33], ['blur(0px)', 'blur(0px)', 'blur(3px)']);
 
   // Estágio 1: "SEU TELHADO VIRA USINA"
-  const stage1Opacity = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [0, 1, 1, 0]);
-  const stage1Y = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [22, 0, 0, -22]);
-  const stage1Scale = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], [0.97, 1, 1, 0.97]);
-  const stage1Blur = useTransform(smoothProgressValue, [0.26, 0.38, 0.58, 0.70], ['blur(3px)', 'blur(0px)', 'blur(0px)', 'blur(3px)']);
+  const stage1Opacity = useTransform(smoothProgressValue, [0.23, 0.31, 0.48, 0.58], [0, 1, 1, 0]);
+  const stage1Y = useTransform(smoothProgressValue, [0.23, 0.31, 0.48, 0.58], [22, 0, 0, -22]);
+  const stage1Scale = useTransform(smoothProgressValue, [0.23, 0.31, 0.48, 0.58], [0.97, 1, 1, 0.97]);
+  const stage1Blur = useTransform(smoothProgressValue, [0.23, 0.31, 0.48, 0.58], ['blur(3px)', 'blur(0px)', 'blur(0px)', 'blur(3px)']);
 
   // Estágio 2: "DE NOITE VOCÊ USUFRUI"
-  const stage2Opacity = useTransform(smoothProgressValue, [0.62, 0.74, 1], [0, 1, 1]);
-  const stage2Y = useTransform(smoothProgressValue, [0.62, 0.74, 1], [22, 0, 0]);
-  const stage2Scale = useTransform(smoothProgressValue, [0.62, 0.74, 1], [0.97, 1, 1]);
-  const stage2Blur = useTransform(smoothProgressValue, [0.62, 0.74, 1], ['blur(3px)', 'blur(0px)', 'blur(0px)']);
+  const stage2Opacity = useTransform(smoothProgressValue, [0.50, 0.58, 1], [0, 1, 1]);
+  const stage2Y = useTransform(smoothProgressValue, [0.50, 0.58, 1], [22, 0, 0]);
+  const stage2Scale = useTransform(smoothProgressValue, [0.50, 0.58, 1], [0.97, 1, 1]);
+  const stage2Blur = useTransform(smoothProgressValue, [0.50, 0.58, 1], ['blur(3px)', 'blur(0px)', 'blur(0px)']);
 
   const stageMotionStyles = [
     { opacity: stage0Opacity, y: stage0Y, scale: stage0Scale, filter: stage0Blur },
@@ -98,6 +98,24 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     });
   }, []);
 
+  useMotionValueEvent(smoothProgressValue, 'change', (videoProgress) => {
+    const duration = durationRef.current || 13.35;
+    targetTimeRef.current = videoProgress * duration;
+    scheduleSeek();
+
+    let stage = 0;
+    if (videoProgress >= 0.54) {
+      stage = 2;
+    } else if (videoProgress >= 0.30) {
+      stage = 1;
+    }
+
+    if (stage !== currentStageRef.current) {
+      currentStageRef.current = stage;
+      setCurrentStage(stage);
+    }
+  });
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -106,6 +124,27 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       if (video.duration && !isNaN(video.duration) && video.duration > 0) {
         durationRef.current = video.duration;
       }
+      scheduleSeek();
+    };
+
+    const primePlayback = () => {
+      video.muted = true;
+      const playback = video.play();
+      if (playback) {
+        playback
+          .then(() => {
+            video.pause();
+            scheduleSeek();
+          })
+          .catch(() => {
+            // Alguns navegadores bloqueiam play programático; o scrub continua funcionando.
+          });
+      }
+    };
+
+    const onCanPlay = () => {
+      onMeta();
+      primePlayback();
     };
 
     const onSeeked = () => {
@@ -124,11 +163,15 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
     };
 
     video.addEventListener('loadedmetadata', onMeta);
-    video.addEventListener('canplay', onMeta);
+    video.addEventListener('canplay', onCanPlay);
     video.addEventListener('seeked', onSeeked);
 
     if (video.readyState >= 1 && video.duration) {
       durationRef.current = video.duration;
+    }
+
+    if (video.readyState >= 3) {
+      primePlayback();
     }
 
     try {
@@ -161,26 +204,6 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         const progress = Math.max(0, Math.min(1, currentScroll / cachedScrollDistance));
         const videoProgress = Math.min(1, progress / VIDEO_SCROLL_END_PROGRESS);
         rawProgressValue.set(videoProgress);
-
-        // Sincroniza as frases com os momentos visuais do vídeo: dia, tarde e noite.
-        let stage = 0;
-        if (videoProgress < 0.35) {
-          stage = 0;
-        } else if (videoProgress < 0.70) {
-          stage = 1;
-        } else {
-          stage = 2;
-        }
-
-        if (stage !== currentStageRef.current) {
-          currentStageRef.current = stage;
-          setCurrentStage(stage);
-        }
-
-        // Scrub do vídeo: percorre a linha do tempo antes do final do hero e segura o frame noturno.
-        const duration = durationRef.current || 13.35;
-        targetTimeRef.current = videoProgress * duration;
-        scheduleSeek();
       });
     };
 
@@ -192,7 +215,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', measureContainer);
       video.removeEventListener('loadedmetadata', onMeta);
-      video.removeEventListener('canplay', onMeta);
+      video.removeEventListener('canplay', onCanPlay);
       video.removeEventListener('seeked', onSeeked);
       if (seekRafRef.current !== null) {
         cancelAnimationFrame(seekRafRef.current);
@@ -231,14 +254,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       headline: 'DE DIA O SOL TRABALHA PARA VOCÊ.',
       subcopy: 'Todos os dias. Sem falhar. Grátis.',
       shortLabel: '01. DE DIA',
-      targetProgress: 0.10,
+      targetProgress: 0.08,
     },
     {
       id: 'tarde',
       headline: 'SEU TELHADO VIRA USINA',
       subcopy: 'Cada raio vira crédito em sua conta Coelba.',
       shortLabel: '02. TARDE',
-      targetProgress: 0.50,
+      targetProgress: 0.34,
     },
     {
       id: 'noite',
@@ -246,7 +269,7 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
       subcopy: 'Ar Ligado, Casa acesa. Família Tranquila.',
       shortLabel: '03. DE NOITE',
       showCta: true,
-      targetProgress: 0.85,
+      targetProgress: 0.64,
     },
   ];
 
@@ -263,14 +286,14 @@ export const HeroScrolltelling: React.FC<HeroScrolltellingProps> = ({ onNavigate
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#0A0D14] flex items-center justify-center">
           <video
             ref={videoRef}
-            src="/Videos/videofinal21_smooth.mp4"
             muted
             playsInline
             preload="auto"
+            poster="/Videos/hero-poster.jpg"
             className="w-full h-full object-contain md:object-cover"
             aria-hidden="true"
           >
-            <source src="/Videos/videofinal21_smooth.mp4" type="video/mp4" />
+            <source src="/Videos/videofinal21_web.mp4" type="video/mp4" />
             <source src="/Videos/videofinal21.mp4" type="video/mp4" />
           </video>
         </div>
